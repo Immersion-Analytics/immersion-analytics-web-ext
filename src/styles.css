@@ -1,0 +1,246 @@
+/**
+ * ©2021 Virtual Cove, Inc. d/b/a Immersion Analytics. All Rights Reserved. Patented.
+ *
+ * Immersion Analytics Runtime - Tableau Dashboard Extension
+ * Utilizes the Immersion Analytics Runtime javascript API and Tableau Dashboard Extensions API
+ * to drive holographic visualizations in AR/VR/XR devices like Hololens2 or Oculus from a Tableau dashboard
+ */
+
+
+body {
+  font-size: 11px;
+}
+
+.btn {
+  font-size: 12px;
+  line-height: 1.2;
+  padding: 2px 4px;
+}
+
+.btn span {
+  vertical-align: middle;
+  margin-bottom: -2px;
+  display: inline-block;
+}
+
+.btn .material-icons {
+  font-size: 1.5em;
+  vertical-align: middle;
+}
+
+.container-fluid {
+  padding-left: 2px;
+  padding-right: 2px;
+}
+
+.modal-footer {
+  flex-wrap: nowrap;
+}
+
+.modal-footer .button-group {
+  display: flex;
+}
+
+.ia-template {
+  display: none;
+}
+
+.table td, .table th{
+  padding: .3rem .1rem;
+  vertical-align: middle;
+}
+
+.text-input-with-dropdown {
+  /*border-left: none;*/
+}
+
+.text-input-with-dropdown select {
+  font-size: 0; /* Hide text content of select */
+    background-position: 7px 1px;
+  /*padding: 0 .7em;*/
+  /*border-radius: 0 5px 5px 0;*/
+  /*line-height: 1.95em;*/
+}
+
+.text-input-with-dropdown input {
+  /*border-radius: 5px 0 0 5px;*/
+  /*border-right: none;*/
+  /*margin-right: -1px;*/
+}
+
+input[type="text"], input[type="password"] {
+  border: none;
+  border-bottom: .5px solid #bbb;
+  /*border-radius: 0;*/
+  line-height: 2em;
+}
+
+@media (min-width:576px) {
+  .modal-dialog-centered {
+    min-height: calc(100% - 3.5rem);
+  }
+}
+
+@media (min-width:768px) {
+  .modal-xl {
+    max-width: 90%;
+  }
+}
+
+#ia-header {
+  margin: 0px;
+  margin-bottom: 6px;
+  padding-bottom: 2px;
+  border-bottom: 1px solid #aaa;
+}
+
+.icon-btn {
+  background: none;
+  border: none !important;
+  font-size: 1.4em;
+  padding: 0 4px !important;
+  line-height: 1;
+  min-width: 24px !important;
+}
+
+.connection-icon {
+  font-size:1.4em;
+  margin-bottom: .15em;
+  /*color: #007bff;   !* from bootstrap *!*/
+}
+
+.visualizations-icon {
+  font-size:2.2em;
+  margin-bottom: .05em
+}
+
+.add-icon {
+    font-size: 1.1em;
+}
+
+.delete-icon {
+  font-size: 1.4em;
+}
+
+.refresh-icon {
+  font-size: 1.7em !important;
+  margin-top: .1em;
+}
+
+.trash-icon {
+  font-size: 1.2em;
+  margin-bottom: .1em;
+}
+
+/* Table row without boundary between itself and the row above */
+/*tr.connected-row {*/
+/*}*/
+
+tr.connected-row td {
+  border-top: none;
+  padding-top: 0px;
+}
+
+.form-inline .form-group {
+  flex-grow: 1;
+}
+.form-inline input {
+  flex-grow: 1;
+}
+
+.table input {
+    width: 100%;
+}
+
+fieldset[disabled] tr {
+  opacity: .6;
+}
+
+#ia-axis-mappings {
+  font-size: .9rem;
+}
+
+#ia-axis-mappings .dataTables_filter {
+  float: right !important;
+}
+
+.ia-axis-mapping .dropdown-menu {
+  font-size: 1em;
+  max-height: 20em;
+  overflow-y: auto;
+}
+
+.ia-axis-mapping .dropdown-item {
+}
+
+
+#loading-spinner-modal .modal-dialog {
+  display: table;
+  position: relative;
+  margin: 0 auto;
+  top: calc(50% - 24px);
+}
+
+#loading-spinner-modal .modal-content {
+  text-align: center;
+  background-color: transparent;
+  border: none;
+  color: #777;
+  font-size: 30px;
+}
+
+#loading-spinner-modal .loading-spinner-icon {
+  /*font-size: 30px;*/
+}
+
+#loading-spinner-modal .loading-msg {
+  font-weight: 100;
+  margin-bottom: 20px;
+}
+
+/*
+.ion-load-c {
+  display: inline-block;
+  animation: spin 1.5s infinite linear;
+}
+
+@keyframes spin {
+  from {
+    transform:rotate(0deg);
+  }
+  to {
+    transform:rotate(360deg);
+  }
+}
+ */
+
+.ia-show-console {
+  font-size: 14px;
+}
+
+#console-out {
+  font-size: 10px;
+  max-width: 98vw;
+}
+
+#console-out .ia-copy-content {
+  display: block;
+  position: absolute;
+  top: 0;
+  right: 0;
+  font-size: 20px;
+}
+
+#console-out p {
+  margin-bottom: .4em;
+}
+/*#loading-spinner-modal {*/
+/*  max-height: 50vh;*/
+/*}*/
+
+.modal-backdrop {
+  background-color: rgba(1,1,1,.5) !important;
+}
+
+#variable-select-modal {
+}
