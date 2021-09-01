@@ -1,6 +1,6 @@
 import React from "react";
-import {Container, Row, Col, Table, NavDropdown} from "react-bootstrap";
-import {Button, TextField, DropdownSelect} from "@tableau/tableau-ui";
+import {Container, Row, Col, Table, Dropdown, DropdownButton} from "react-bootstrap";
+import {Button, TextField} from "@tableau/tableau-ui";
 import {ReconnectButton, useConnectionState, isJoiningOrJoinedRoom} from "./components";
 
 function ConnectionControlPanel(props) {
@@ -13,12 +13,9 @@ function ConnectionControlPanel(props) {
 
     const serverAddressRef = React.createRef();
     /** Handle user selecting an IA room or lobby server */
-    const handleServerAddressSelect = e => {
-        serverAddressRef.current.value = e.target.value;
-        app.reconnectToLobby(e.target.value);
-
-        // This menu should not maintain a selection
-        e.target.value = null;
+    const handleServerAddressSelect = address => {
+        serverAddressRef.current.value = address;
+        app.reconnectToLobby(address);
     };
 
     const handleServerAddressInput = e => {
@@ -45,11 +42,10 @@ function ConnectionControlPanel(props) {
                             <TextField className="ia-server-address text-input-with-dropdown" kind='line'
                                        onChange={handleServerAddressInput}
                                        ref={serverAddressRef} />
-                            <DropdownSelect className="text-input-with-dropdown" id="ia-server-select" onChange={handleServerAddressSelect}>
-                                <option></option>
-                                <option value='ws://localhost:11701'>Local Visualizer App</option>
-                                <option value='ws://localhost:11700'>Local Runtime Server</option>
-                            </DropdownSelect>
+                            <DropdownButton className="text-input-with-dropdown" title='' onSelect={handleServerAddressSelect}>
+                                <Dropdown.Item eventKey='ws://localhost:11701'>Local Visualizer App</Dropdown.Item>
+                                <Dropdown.Item eventKey='ws://localhost:11700'>Local Runtime Server</Dropdown.Item>
+                            </DropdownButton>
                             <ReconnectButton className='ml-2' app={app} />
                         </td>
                     </tr>

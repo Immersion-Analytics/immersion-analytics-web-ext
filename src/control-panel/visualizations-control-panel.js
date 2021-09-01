@@ -1,8 +1,9 @@
-import {Col, Container, Row, Table} from "react-bootstrap";
+import {Col, Container, DropdownButton, Dropdown, Row, Table} from "react-bootstrap";
 import React, {useEffect, useState} from "react";
 import {Button, DropdownSelect, TextField} from "@tableau/tableau-ui";
-import {ImPlus, IoCloseCircle, MdDelete} from "react-icons/all";
+
 import {AddIcon, DeleteIcon, IconButton, TrashIcon} from "./components";
+import {IA_MAX_ROWS_TO_LOAD} from "../IAExtensionController";
 
 import {usePropertyValue} from "../lib";
 
@@ -24,8 +25,14 @@ function VisualizationsControlPanel(props) {
 
     // re-render when selection changes
     usePropertyValue(() => scene.selection);
+    const visualizations = usePropertyValue(() => scene.visualizations);
+    const vizName = usePropertyValue(() => scene.focusedViz.nameProperty, '');
+    const datasetName = usePropertyValue(() => scene.focusedViz.axes.sourceDatasetProperty);
 
-    const vizName = usePropertyValue(() => scene.focusedViz.nameProperty);
+    useEffect(() => {
+        if (!scene.focusedViz && visualizations?.count > 0)
+            scene.focusedViz = visualizations.get(0);
+    });
 
     /** Sets the Name property for the selected IA Visualization */
     const handleVizNameInput = e => {
@@ -47,7 +54,9 @@ function VisualizationsControlPanel(props) {
                 <thead>
                     <tr>
                         <th colSpan="2">
-                            <VisualizationsSelect app={app} />
+                            <VisualizationsSelect app={app}
+                                                  selectedVizName={scene.focusedViz?.name}
+                                                  vizNames={visualizations?.keys}/>
                         </th>
                     </tr>
                 </thead>
@@ -56,24 +65,13 @@ function VisualizationsControlPanel(props) {
                         <td>Visualization Name:</td>
                         <td>
                             <TextField value={vizName}
-                                       onClick={handleVizNameInput} />
+                                       onChange={handleVizNameInput} />
                         </td>
                     </tr>
                     <tr>
                         <td>Visualization Data Source:</td>
                         <td>
-                            <DropdownSelect>
-
-                            </DropdownSelect>
-                            <Container>
-                                <Row>
-                                    <Col />
-                                    <Col>
-                                        Rows: <span className="ia-dataset-row-count"></span>, Variables: <span
-                                        className="ia-dataset-var-count"></span>
-                                    </Col>
-                                </Row>
-                            </Container>
+                            <DataSourceSelectView app={app} selectedDatasetName={datasetName}/>
                         </td>
                     </tr>
                     <tr>
@@ -111,34 +109,105 @@ export default VisualizationsControlPanel;
 
 
 function VisualizationsSelect(props) {
-    const {app} = props;
-    const {scene} = app;
-
-    const visualizations = usePropertyValue(() => scene.visualizations);
+    const {selectedVizName, vizNames, app} = props;
 
     const makeVizSelectOption = vizName => <option key={vizName}>{vizName}</option>;
 
     return (
-        <Container fluid>
-            <Row>
-                <Col>
-                    <DropdownSelect
-                        value={scene.focusedViz?.name}
+        <div className="d-flex justify-content-between">
+            <div>
+                <DropdownSelect
+                    value={selectedVizName ?? ''}
                         onChange={e => app.selectViz(e.target.value)}>
-                        { visualizations?.keys.map(makeVizSelectOption) }
+                        { vizNames?.length > 0
+                            ? vizNames.map(makeVizSelectOption)
+                            : <option>- No Visualizations -</option>}
                     </DropdownSelect>
 
                     <IconButton icon={AddIcon} onClick={() => app.newViz()} />
                     <IconButton icon={DeleteIcon} onClick={() => app.removeSelectedViz()} />
-                </Col>
+            </div>
+            <div>
+                <Button kind='lowEmphasis'
+                        onClick={() => app.confirmResetScene()}>
+                    <TrashIcon /> Reset Scene
+                </Button>
+            </div>
+        </div>
+    )
+}
+
+function DataSourceSelectView(props) {
+    const {app, selectedDatasetName} = props;
+
+    const selectedDataset = app.database.get(selectedDatasetName);
+    const rowCount = selectedDataset?.rowCount ?? 0;
+    const variableCount = selectedDataset?.variables.count;
+
+    const rowCountWarning = rowCount === IA_MAX_ROWS_TO_LOAD;
+
+    return (
+        <Container>
+            <Row>
+                <DataSourceSelect {...props} />
+            </Row>
+            <Row>
                 <Col />
                 <Col>
-                    <Button kind='lowEmphasis'
-                            onClick={() => app.confirmResetScene()}>
-                        <TrashIcon /> Reset Scene
-                    </Button>
+                    Rows: <span className={rowCountWarning ? 'text-danger' : ''}>{rowCount}</span>,
+                    Variables: {variableCount}
                 </Col>
             </Row>
         </Container>
-    )
+        );
+}
+
+function DataSourceSelect(props) {
+    const {app, selectedDatasetName} = props;
+
+    const datasets = usePropertyValue(() => app.database.datasets);
+
+    const [dataSourceItems, setDataSourceItems] = useState([]);
+
+    const updateDataSources = () => {
+        app.platform.getDataSourcesAsync()
+            .then(platformDataSources => {
+
+                let items = [];
+
+                items.push({sectionHeaderName: "Active Data Sources:"});
+                if (datasets)
+                {
+                    items = items.concat(datasets.keys.map(name => ({ name: name})));
+                }
+
+                items.push({sectionHeaderName: "Available Data Sources:"})
+                items = items.concat(platformDataSources);
+
+                setDataSourceItems(items);
+            });
+    }
+
+    const makeDataSourceOption = (item, index) => {
+        if (item.sectionHeaderName)
+            return <option disabled key={index}>{item.sectionHeaderName}</option>
+
+        return <Dropdown.Item key={index}
+                              onClick={() => app.setCurrentVisualizationDataSource(item)}>
+            {item.name}
+        </Dropdown.Item>
+    }
+
+    return (
+        // <DropdownSelect onClick={updateDataSources}>
+        //     { dataSourceItems.map(makeDataSourceOption) }
+        // </DropdownSelect>
+        <DropdownButton title={selectedDatasetName ? selectedDatasetName : "<Select Data Source>"}
+                        onClick={updateDataSources}
+                        size='sm'
+                        variant='secondary'
+                        >
+            { dataSourceItems.map(makeDataSourceOption) }
+        </DropdownButton>
+    );
 }

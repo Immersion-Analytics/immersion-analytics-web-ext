@@ -5,10 +5,11 @@
  * Utilizes the Immersion Analytics Runtime javascript API and Tableau Dashboard Extensions API
  * to drive holographic visualizations in AR/VR/XR devices like Hololens2 or Oculus from a Tableau dashboard
  */
+import {parseJSON} from "./lib";
 
 const {IA, confirm} = window;
 
-const IA_MAX_ROWS_TO_LOAD = 2000
+export const IA_MAX_ROWS_TO_LOAD = 2000
 
 export class IAExtensionController {
     constructor(platform, iaClient, errorCallback)
@@ -108,13 +109,54 @@ export class IAExtensionController {
         this.ia.scene.onChanged(e => {
             // Needed to update the point size slider
             // When the user changes point size from within the headset
-            if (e.sourceModel.modelType == 'VizSettings') {
+            if (e.sourceModel.modelType === 'VizSettings') {
                 $this._updateSelectedVizInfo();
             }
         });
 
         // Initialize the states of UI controls to <no visualization selected>
         this._updateSelectedVizInfo();
+    }
+
+    saveConnectionInfo() {
+        const info = JSON.stringify({
+            lobby: {
+                server: this.ia.lobbyServerUri
+            },
+            room: {
+                server: this.ia.roomServerUri,
+                name: this.ia.room?.name
+            },
+        });
+
+        console.log("Save connection info: " + info);
+
+        this.platform.saveSettings({"ia-connection-info": info});
+    }
+
+    handleSettingsChanged(settings) {
+        console.log("Handling settings changed");
+        const connectionInfo = settings["ia-connection-info"];
+        if (connectionInfo)
+            this._tryConnectionInfo(connectionInfo);
+    }
+
+    _tryConnectionInfo(infoStr) {
+        const info = parseJSON(infoStr);
+        if (!info) {
+            console.log("Could not read connection info: " + infoStr);
+        }
+        console.log("Trying connection info");
+
+        const lobbyServer = info.lobby?.server;
+        if (lobbyServer && lobbyServer !== this.ia.lobbyServerUri) {
+            this.ia.reconnectToLobby(lobbyServer);
+        }
+
+        const roomServer = info.room?.server;
+        if (roomServer && roomServer !== this.ia.roomServerUri) {
+            this.ia.connectToRoom(roomServer, info.room.password);
+        }
     }
 
     _handleError(actionSubject, error) {
@@ -248,12 +290,13 @@ export class IAExtensionController {
      */
     selectViz(vizName) {
         const viz = this.scene.visualizations.getKey(vizName);
-        this.scene.selection.setSingleValue(viz);
+        if (viz)        // TODO 8/31/21 fix Runtime SetProperty() for null model value
+            this.scene.focusedViz = viz;
     }
 
     /** Shortcut to retrieve the selected Visualizations from the internally stored name reference */
     getSelectedViz() {
-        return this.ia.scene.visualizations.getKey(this._selectedVizName);
+        return this.scene.focusedViz;
     }
 
     /** Update UI displaying info for the selected IA Visualizations */
@@ -285,23 +328,6 @@ export class IAExtensionController {
         // this._updateMappings(viz, fullRefresh);
 
         this._restoreScrollPosition();
-    }
-
-    _updateSelectedDatasetInfo() {
-        let rows = '-';
-        let variables = '-';
-
-        let selected = this.getSelectedDataset();
-        if (selected.dataset)
-        {
-            rows = selected.dataset.rowCount;
-            if (rows == IA_MAX_ROWS_TO_LOAD)
-                rows = "<span class='text-danger'>" + rows + "</span> (Dataset Truncated)"
-            variables = selected.dataset.variables.count;
-        }
-
-        this._datasetRowCountText.html(rows);
-        this._datasetVariableCountText.html(variables);
     }
 
     /** Refresh data in the  Axis=>Variable mappings table */

@@ -9,10 +9,9 @@ import {Container, Row, Col} from "react-bootstrap";
 import {Tabs} from "@tableau/tableau-ui";
 import ConnectionControlPanel from "./connection-control-panel";
 import VisualizationsControlPanel from "./visualizations-control-panel";
-import {useHistory, useRouteMatch} from 'react-router-dom'
-import {getPanelUrl, usePropertyValue} from "../lib";
+import {useHistory} from 'react-router-dom'
+import {getPanelUrl} from "../lib";
 import {ConnectionIcon, ConnectionStatus, IALogo, VisualizationsIcon} from "./components";
-import {FcScatterPlot, MdCastConnected} from "react-icons/all";
 
 
 function IAControlPanel(props) {
@@ -37,7 +36,7 @@ function IAControlPanel(props) {
         panelId = '';
 
     const selectedTabIndex = tabIndexLookup[panelId];
-    if (selectedTabIndex == undefined)
+    if (selectedTabIndex === undefined)
         return (<div>Unknown Panel</div>);
 
     console.log("Launching IA Control Panel");
@@ -50,11 +49,11 @@ function IAControlPanel(props) {
 
     return (
         <Container fluid>
-            <Row>
+            <Row className='px-2'>
                 <Col>
                     <IALogo />
                 </Col>
-                <Col>
+                <Col className='text-right'>
                     <ConnectionStatus app={app}/>
                 </Col>
 

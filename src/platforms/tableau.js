@@ -1,5 +1,6 @@
 
 import {parseJSON} from "../lib";
+import {DialogModeHash} from "../App";
 
 const {$, tableau} = window;
 
@@ -35,25 +36,42 @@ export class IATableauPlatform {
      * Ensure the bindings list is updated any time a new IA table is added or removed
      * in the IA runtime Database
      */
-    init(ia, onInitialized) {
+    init(ia, callbacks) {
         let $this = this;
+        this.callbacks = callbacks;
         this.ia = ia;
         this.database = ia.scene.database;
 
+        const isDialogMode = window.location.hash === DialogModeHash;
+
         tableau.extensions.initializeAsync()
-            .then(function() {
+            .then(() => {
                 console.log("Tableau JS Initialized");
 
-                $this.database.datasets.onChanged(() => $this._updateBindings());
-                console.error("Handling multi dataset initializations...");
+                if (!isDialogMode)
+                    $this.database.datasets.onChanged(() => $this._updateBindings());
 
-                onInitialized();
+                this._handleInitialized();
             })
             .catch(error => {
                 console.error("Tableau initialization error:", error);
             });
 
-        this._updateBindings();
+        // Bindings should not be managed by sub-dialogs of the extension
+        if (!isDialogMode)
+            this._updateBindings();
+    }
+
+    _handleInitialized() {
+        tableau.extensions.settings.addEventListener(tableau.TableauEventType.SettingsChanged, e => {
+            console.log("Tableau Extension Settings changed");
+            this.callbacks.onSettingsChanged(e.newSettings);
+        });
+
+        this.callbacks.onInitialized();
+
+        // Load last saved settings from dashboard
+        this.callbacks.onSettingsChanged(tableau.extensions.settings.getAll());
     }
 
     openDialog(url, options) {
@@ -75,6 +93,25 @@ export class IATableauPlatform {
             });
     }
 
+    saveSettings(settings) {
+        let changed = false;
+        Object.entries(settings).forEach(entry => {
+            const [key, value] = entry;
+            if (value === tableau.extensions.settings.get(key))
+                return;
+
+            tableau.extensions.settings.set(key, value);
+            changed = true;
+        });
+
+        if (!changed)
+            return;
+
+        tableau.extensions.settings.saveAsync()
+            .then(() => console.log("IA extension settings saved"))
+            .catch(() => console.error("Could not save extension settings"));
+    }
+
     /**
      * Create a new IA table based on data source metadata.
      * @dataSrc.name is used for the IA table name.
@@ -92,10 +129,10 @@ export class IATableauPlatform {
         }
 
         // Return early if table is already bound to this worksheet
-        if (dataset.sourceType == IATableauSourceType)
+        if (dataset.sourceType === IATableauSourceType)
         {
             let srcInfo = parseJSON(dataset.sourceInfo);
-            if (srcInfo && srcInfo.worksheetName == dataSrc.worksheetName)
+            if (srcInfo && srcInfo.worksheetName === dataSrc.worksheetName)
                 return;
         }
 
@@ -116,7 +153,8 @@ export class IATableauPlatform {
      * whose source type is equal to `IATableauSourceType`
      */
     _updateBindings() {
-        let datasets = this.database.datasets;
+        const datasets = this.database.datasets;
+
         datasets.keys.forEach(name => {
             console.log("Processing table " + name);
             let dataset = datasets[name];
@@ -140,11 +178,21 @@ export class IATableauPlatform {
                 return;
             }
 
-            let binding = new IATableauDataSourceBinding(worksheet, src.logicalTableId, this.ia, dataset)
-            this._datasetBindings[dataset.name] = binding;
+            let binding = new IATableauDataSourceBinding(datasets, worksheet, src.logicalTableId, name);
+            this._datasetBindings[name] = binding;
 
             // TODO handle table or worksheet renaming
         });
+
+        // Remove inactive bindings
+        for (let name in this._datasetBindings) {
+            if (datasets.containsKey(name))
+                continue;
+
+            const binding = this._datasetBindings[name];
+            binding.dispose();
+            delete this._datasetBindings[name];
+        }
     }
 
     /** Compile all Worksheet LogicalTables available in this dashboard */
@@ -190,14 +238,19 @@ export class IATableauPlatform {
 class IATableauDataSourceBinding {
     // TODO dispose this, or don't update when a table is not currently referenced?
 
-    constructor(tableauWorksheet, logicalTableId, ia, table)
+    constructor(allDatasets, tableauWorksheet, logicalTableId, datasetName)
     {
+        this.allDatasets = allDatasets;
         this.worksheet = tableauWorksheet;
         this.tableId = logicalTableId;
-        this.table = table;
+        this.datasetName = datasetName;
         this._unregisterListenerFunctions = [];
-        console.log("Initializing data binding for " + table.Name);
+        console.log("Initializing data binding for " + datasetName);
         this.updateData();
+    }
+
+    dispose() {
+        this._unregisterListeners();
     }
 
     /** Unregister selection+filter change listener */
@@ -238,19 +291,20 @@ class IATableauDataSourceBinding {
         };
 
         if (this.tableId)
-            return this.worksheet.getUnderlyingTableDataAsync(this.tableId, options)
+            return this.worksheet
+                .getUnderlyingTableDataAsync(this.tableId, options)
+                .then(this.formatUnderlyingTableData);
         else
-            return this.worksheet.getSummaryDataAsync(options)
+            return this.worksheet
+                .getSummaryDataAsync(options)
+                .then(this.formatSummaryTableData)
 
     }
 
-    /** Convert Tableau Worksheet data into IA data table format, and apply to the bound IA Data Table */
-    setTableData(worksheetData) {
-        console.log("Data table update: " + this.table.name);
-
+    formatUnderlyingTableData(worksheetData) {
         let dataRows = worksheetData.data;
 
-        let columns = worksheetData.columns.map(function(column) {
+        const dataColumns = worksheetData.columns.map(function(column) {
             let type = Tableau2IADataTypeLookup[column.dataType];
             if (!type)
                 return null;
@@ -263,14 +317,100 @@ class IATableauDataSourceBinding {
                 data : dataRows.map(row => row[index].nativeValue)
             }
         });
-
-        let table = {
-            name : this.worksheet.name,
-            columns : columns.filter(c => c)    // remove null columns
-        }
-
-        this.table.setData(table);
+        return dataColumns;
     }
 
+    formatSummaryTableData(worksheetSummaryData) {
+        const {data, columns} = worksheetSummaryData;
+
+        const dimensions = {}
+        let measureNamesIndex = -1;
+        let measureValuesIndex = -1;
+
+        columns.forEach(column => {
+            const {fieldName, index} = column;
+            if (fieldName == "Measure Names")
+                measureNamesIndex = index;
+            else if (fieldName == "Measure Values")
+                measureValuesIndex = index;
+            else {
+                dimensions[index] = fieldName;
+            }
+        });
+
+        const hasMeasures = measureNamesIndex >=0 && measureValuesIndex >= 0;
+        // OPTIMIZE if no measures are present, we can shortcut to
+        // use formatUnderlyingTableData() instead
+
+        const itemsLookup = {};
+
+        // Dictionary of (column name => column type)
+        const resultColumnNameTypeLookup = {};
+        Object.entries(dimensions).forEach(entry => {
+            const [index, name] = entry;
+            // Add dimensions to the result column name => type dictionary
+            resultColumnNameTypeLookup[name] = columns[index].dataType;
+        });
+
+        data.forEach(row => {
+            // Build a unique key identifying this item based on its dimensions
+            let itemKey = "";
+            for (let index in dimensions)
+                itemKey += '{{' + row[index].formattedValue + '}}';
+
+            // get or create a new object for this unique item
+            let item = itemsLookup[itemKey];
+            if (!item)
+            {
+                item = itemsLookup[itemKey] = {};
+
+                // Store dimensions values in the newly created item
+                for (let index in dimensions)
+                    item[dimensions[index]] = row[index].nativeValue;
+            }
+
+            if (!hasMeasures)
+                return;
+
+            // Store the measure value from this data row
+            const measureName = row[measureNamesIndex].formattedValue;
+            const measureValue = row[measureValuesIndex].nativeValue;
+            item[measureName] = measureValue;
+
+            resultColumnNameTypeLookup[measureName] = 'float';   // Add measure to the result column name dict if not already present
+        });
+
+        const itemsArray = Object.values(itemsLookup);
+
+        return Object.entries(resultColumnNameTypeLookup).map(entry => {
+            let [columnName, columnType] = entry;
+            columnType = Tableau2IADataTypeLookup[columnType];
+            if (!columnType)
+                return null;
+
+            return {
+                name: columnName,
+                type: columnType,
+                data: itemsArray.map(item => item[columnName])
+            };
+        });
+    }
+
+    /** Convert Tableau Worksheet data into IA data table format, and apply to the bound IA Data Table */
+    setTableData(dataColumns) {
+        console.log("Dataset update: " + this.datasetName);
+
+        let dataTable = {
+            name : this.datasetName,
+            columns : dataColumns.filter(c => c)    // remove null columns
+        }
+
+        const dataset = this.allDatasets.getKey(this.datasetName);
+        if (!dataset){
+            console.error("Warning: trying to update non-existing dataset: " + this.datasetName);
+            return;
+        }
+        dataset.setData(dataTable);
+    }
 }
 

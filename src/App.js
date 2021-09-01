@@ -85,11 +85,18 @@ function App() {
 
         const platform = platformConstructor();
 
-        setAppController(new IAExtensionController(platform, window.ia));
+        const app = new IAExtensionController(platform, window.ia);
+        setAppController(app);
 
-        platform.init(window.ia, () => {
-            console.log(`Platform ${platformId} ready`);
-            setIsPlatformLoading(false)
+        platform.init(window.ia, {
+            onInitialized: () => {
+                console.log(`Platform ${platformId} ready`);
+                setIsPlatformLoading(false)
+            },
+
+            onSettingsChanged: settings => {
+              app.handleSettingsChanged(settings);
+            }
         });
     };
 
@@ -113,7 +120,11 @@ function App() {
     });
 
     // Once the IA Scene synchronization between XR device and web browser is initialized this method will be called
-    const handleRoomConnectionReady = () => console.log("Room connection is ready!");
+    const handleRoomConnectionReady = () => {
+        console.log("Room connection is ready!");
+        appController.saveConnectionInfo();
+    }
+
     useEffect(() => {
         if (appController)
             return appController.ia.onSyncReady(handleRoomConnectionReady);
@@ -154,3 +165,7 @@ function App() {
 }
 
 export default (App);
+
+// Used to notify panels that they are a opened as a sub-dialog of the application
+// e.g. Used in Tableau platform to disable dataset binding management in dialogs
+export const DialogModeHash = "#dialog";

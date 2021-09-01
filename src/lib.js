@@ -4,20 +4,29 @@ import {useEffect, useState} from "react";
  * Refreshes component when property value changes.
  * If getter throws an exception, returned value will be set to undefined.
  */
-export function usePropertyValue(getter, initialValue) {
-    const [propertyValue, setPropertyValue] = useState(initialValue);
+export function usePropertyValue(getter, undefinedValue) {
+
+    let property;
+    try {
+        property = getter();
+    } catch {}
+
+    const [propertyValue, setPropertyValue] = useState();
+
+    const propertyObjectId = property?._netWrapper._id;
 
     useEffect(() => {
-        try {
-            const property = getter();
+        if (property)
+        {
+            setPropertyValue(property.value);
+
             return property.onChanged(() => {
                 setPropertyValue(property.value)
             });
-        } catch {
-            setPropertyValue(undefined);
         }
-    });
-    return propertyValue;
+    }, [propertyObjectId]);
+
+    return propertyValue === undefined ? undefinedValue : propertyValue;
 }
 
 export function getPanelUrl(platformId, panelId) {

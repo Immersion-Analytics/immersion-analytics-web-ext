@@ -12,15 +12,15 @@ import {Button} from "@tableau/tableau-ui";
 
 import {Col, Row, Container, Image} from "react-bootstrap";
 
-import {BsTerminal, GrConnect, GiSunglasses} from "react-icons/all";
-import {ConnectionStatus, IALogo} from "./control-panel/components";
+import {ConnectionIcon, ConnectionStatus, IALogo, VisualizationsIcon} from "./control-panel/components";
+import {DialogModeHash} from "./App";
 
 
 function IAOverviewDisplay(props) {
     const {app} = props;
 
     const showConfig = (panel) => {
-        const dialogUrl = `${window.location.origin}/${app.platform.id}-${panel}`;
+        const dialogUrl = `${window.location.origin}/${app.platform.id}-${panel}${DialogModeHash}`;
         console.log("Opening IA dialog at " + dialogUrl);
 
         const dialogOptions = { width: 500, height: 500 };
@@ -38,13 +38,13 @@ function IAOverviewDisplay(props) {
                     <Button className='ia-show-connect mr-1' density='high'
                         onClick={() => showConfig('connection')}>
 
-                        <GrConnect /><span>&nbsp;Connect</span>
+                        <ConnectionIcon /><span>&nbsp;Connect</span>
                     </Button>
 
                     <Button className="ia-show-viz-config" density='high'
                             onClick={() => showConfig('visualizations')}>
 
-                        <GiSunglasses /><span>&nbsp;Visualizations</span>
+                        <VisualizationsIcon /><span>&nbsp;Visualizations</span>
                     </Button>
 
                     {/*    <Button className="icon-btn ia-show-console" data-target="#console-out-modal" data-toggle="modal">*/}

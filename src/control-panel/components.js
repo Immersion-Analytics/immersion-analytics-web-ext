@@ -31,7 +31,7 @@ export function useConnectionState(ia) {
 
 export function isJoiningOrJoinedRoom(connectionState) {
     const {id} = connectionState;
-    return id == "JoiningRoom" || id == "JoinedRoom";
+    return id === "JoiningRoom" || id === "JoinedRoom";
 }
 
 export function ConnectionStatus(props) {
