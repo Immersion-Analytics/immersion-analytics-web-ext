@@ -1,7 +1,7 @@
 import React from "react";
 import {Container, Row, Col, Table, Dropdown, DropdownButton} from "react-bootstrap";
 import {Button, TextField} from "@tableau/tableau-ui";
-import {ReconnectButton, useConnectionState, isJoiningOrJoinedRoom} from "./components";
+import {ReconnectButton, useConnectionState, isJoiningOrJoinedRoom, ZeroWidthSpace} from "./components";
 
 function ConnectionControlPanel(props) {
     const { app } = props;
@@ -37,17 +37,23 @@ function ConnectionControlPanel(props) {
                 </thead>
                 <tbody>
                     <tr>
-                        <td>Address</td>
+                        <td>Lobby Address</td>
                         <td className="d-flex align-items-center">
                             <TextField className="ia-server-address text-input-with-dropdown" kind='line'
                                        onChange={handleServerAddressInput}
-                                       ref={serverAddressRef} />
+                                       ref={serverAddressRef}
+                                       value={ app.ia.lobbyServerUri ?? '' } />
+
                             <DropdownButton className="text-input-with-dropdown" title='' onSelect={handleServerAddressSelect}>
                                 <Dropdown.Item eventKey='ws://localhost:11701'>Local Visualizer App</Dropdown.Item>
                                 <Dropdown.Item eventKey='ws://localhost:11700'>Local Runtime Server</Dropdown.Item>
                             </DropdownButton>
                             <ReconnectButton className='ml-2' app={app} />
                         </td>
+                    </tr>
+                    <tr className=''>
+                        <td className={ app.ia.roomServerUri ? '' : 'text-muted'}>Room Address</td>
+                        <td>{ app.ia.roomServerUri ?? ''}</td>
                     </tr>
                     <tr className="connected-row">
                         <td></td>

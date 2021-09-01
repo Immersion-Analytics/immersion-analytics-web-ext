@@ -1,6 +1,6 @@
 
 import {parseJSON} from "../lib";
-import {DialogModeHash} from "../App";
+import {DialogModeHash} from "../lib";
 
 const {$, tableau} = window;
 

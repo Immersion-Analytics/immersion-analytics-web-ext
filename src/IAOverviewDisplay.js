@@ -13,7 +13,7 @@ import {Button} from "@tableau/tableau-ui";
 import {Col, Row, Container, Image} from "react-bootstrap";
 
 import {ConnectionIcon, ConnectionStatus, IALogo, VisualizationsIcon} from "./control-panel/components";
-import {DialogModeHash} from "./App";
+import {DialogModeHash} from "./lib";
 
 
 function IAOverviewDisplay(props) {
@@ -29,35 +29,27 @@ function IAOverviewDisplay(props) {
     };
 
     return (
-    <Container fluid>
-            <Row>
-                <Col md='auto'>
-                    <IALogo />
-                </Col>
-                <Col md='auto'>
-                    <Button className='ia-show-connect mr-1' density='high'
-                        onClick={() => showConfig('connection')}>
+    <div className='d-flex flex-wrap align-items-center'>
+        <IALogo className='mr-2'/>
+        <div className='d-flex flex-wrap align-items-center'>
+            <Button className='mr-1 mt-1' density='high'
+                onClick={() => showConfig('connection')}>
 
-                        <ConnectionIcon /><span>&nbsp;Connect</span>
-                    </Button>
+                <ConnectionIcon /><span>&nbsp;Connect</span>
+            </Button>
 
-                    <Button className="ia-show-viz-config" density='high'
-                            onClick={() => showConfig('visualizations')}>
+            <Button className="mr-1 mt-1" density='high'
+                    onClick={() => showConfig('visualizations')}>
 
-                        <VisualizationsIcon /><span>&nbsp;Visualizations</span>
-                    </Button>
-
-                    {/*    <Button className="icon-btn ia-show-console" data-target="#console-out-modal" data-toggle="modal">*/}
-                    {/*        <BsTerminal />*/}
-                    {/*    </Button>*/}
-                </Col>
-                <Col md='auto'>
-                    {/*<span className="d-inline-block text-nowrap">Connection Status:</span>&nbsp;*/}
-                    <ConnectionStatus app={app} />
-                </Col>
-                <Col></Col>
-            </Row>
-        </Container>
+                <VisualizationsIcon /><span>&nbsp;Visualizations</span>
+            </Button>
+        </div>
+            {/*    <Button className="icon-btn ia-show-console" data-target="#console-out-modal" data-toggle="modal">*/}
+            {/*        <BsTerminal />*/}
+            {/*    </Button>*/}
+            {/*<span className="d-inline-block text-nowrap">Connection Status:</span>&nbsp;*/}
+        <ConnectionStatus app={app} className='mt-1'/>
+        </div>
     );
 }
 

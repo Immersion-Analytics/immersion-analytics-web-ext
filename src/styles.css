@@ -35,10 +35,50 @@ body {
   overflow-y:auto;
 }
 
+/** =============================== */
+/** UI to match Tableau button appearance */
+/** Override bootstrap styles */
+.dropdown-toggle {
+  background-color: transparent !important;
+  color: #333 !important;
+  border: 1px solid #cbcbcb !important;
+  border-radius: 1px;
+  padding: 0 7px;
+  height: 24px;
+}
+
+.dropdown-toggle:hover:enabled, .dropdown-toggle:active {
+  color: #333 !important;
+  background-color: #fafafa !important;
+  border-color: #333 !important;
+}
+
+.dropdown-toggle:focus, .dropdown-toggle:active:focus {
+  color: #333 !important;
+  background-color: transparent !important;
+  border-color: #3498DB !important;
+  box-shadow: 0 0 4px 0 #3498DB !important;
+  outline: none;
+}
+/** =============================== */
+/** =============================== */
+
+
+
 .container-fluid {
   padding-left: 2px;
   padding-right: 2px;
 }
+
+.h-100vh {
+  height: 100vh;
+}
+
+/* Ensure the tabpanel body of a flex-grow Tab component grows too */
+.flex-grow-1 > div[role='tabpanel'] {
+  flex-grow: 1 !important;
+}
+
 
 .modal-footer {
   flex-wrap: nowrap;
@@ -111,14 +151,16 @@ input[type="text"], input[type="password"] {
 }
 
 .connection-icon {
+  position:relative;
   font-size:1.4em;
-  margin-bottom: .15em;
+  bottom: .15em;
   /*color: #007bff;   !* from bootstrap *!*/
 }
 
 .visualizations-icon {
+  position:relative;
   font-size:2.2em;
-  margin-bottom: .05em
+  bottom: .08em
 }
 
 .add-icon {
@@ -159,7 +201,7 @@ tr.connected-row td {
     width: 100%;
 }
 
-fieldset[disabled] tr {
+fieldset[disabled] tr, .text-muted {
   opacity: .6;
 }
 
@@ -179,7 +221,6 @@ fieldset[disabled] tr {
 
 .ia-axis-mapping .dropdown-item {
 }
-
 
 #loading-spinner-modal .modal-dialog {
   display: table;

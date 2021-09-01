@@ -165,7 +165,3 @@ function App() {
 }
 
 export default (App);
-
-// Used to notify panels that they are a opened as a sub-dialog of the application
-// e.g. Used in Tableau platform to disable dataset binding management in dialogs
-export const DialogModeHash = "#dialog";

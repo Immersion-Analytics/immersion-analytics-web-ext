@@ -5,7 +5,7 @@ import {Button, DropdownSelect, TextField} from "@tableau/tableau-ui";
 import {AddIcon, DeleteIcon, IconButton, TrashIcon} from "./components";
 import {IA_MAX_ROWS_TO_LOAD} from "../IAExtensionController";
 
-import {usePropertyValue} from "../lib";
+import {useIAObject, usePropertyValue} from "../lib";
 
 
 // function useVizName(viz) {
@@ -49,7 +49,7 @@ function VisualizationsControlPanel(props) {
     }
 
     return (
-        <Container fluid>
+        <Container fluid className='h-100'>
             <Table borderless>
                 <thead>
                     <tr>
@@ -140,7 +140,7 @@ function VisualizationsSelect(props) {
 function DataSourceSelectView(props) {
     const {app, selectedDatasetName} = props;
 
-    const selectedDataset = app.database.get(selectedDatasetName);
+    const selectedDataset = useIAObject(() => app.database.get(selectedDatasetName));
     const rowCount = selectedDataset?.rowCount ?? 0;
     const variableCount = selectedDataset?.variables.count;
 
@@ -205,7 +205,6 @@ function DataSourceSelect(props) {
         <DropdownButton title={selectedDatasetName ? selectedDatasetName : "<Select Data Source>"}
                         onClick={updateDataSources}
                         size='sm'
-                        variant='secondary'
                         >
             { dataSourceItems.map(makeDataSourceOption) }
         </DropdownButton>

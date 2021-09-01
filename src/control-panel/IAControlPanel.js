@@ -48,7 +48,7 @@ function IAControlPanel(props) {
 
 
     return (
-        <Container fluid>
+        <Container fluid className='d-flex flex-column h-100vh'>
             <Row className='px-2'>
                 <Col>
                     <IALogo />
@@ -58,17 +58,16 @@ function IAControlPanel(props) {
                 </Col>
 
             </Row>
-            <Row>
-                <Col>
-                    <Tabs
-                        activation='manual'
-                        onTabChange={goToPanel}
-                        selectedTabIndex={selectedTabIndex}
-                        tabs={tabs}
-                        >
-                        { tabs[selectedTabIndex].component(props) }
-                    </Tabs>
-                </Col>
+            <Row className='flex-column flex-grow-1'>
+                <Tabs
+                    activation='manual'
+                    onTabChange={goToPanel}
+                    selectedTabIndex={selectedTabIndex}
+                    tabs={tabs}
+                    className='d-flex flex-column flex-grow-1'
+                    >
+                    { tabs[selectedTabIndex].component(props) }
+                </Tabs>
             </Row>
             <Row>
 

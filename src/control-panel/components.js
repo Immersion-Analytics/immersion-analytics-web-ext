@@ -16,14 +16,32 @@ export function ZeroWidthSpace() {
     return (<span>&#8203;</span>);
 }
 
+// export function Flex(props) {
+//     let {className, vertical, ...otherProps} = props;
+//     className += " d-flex";
+//
+//     if (vertical === undefined || vertical)
+//         className += " flex-column";
+//
+//     return (
+//         <div className={className} {...otherProps}>
+//             {props.children}
+//         </div>
+//     );
+// }
+
 export function useConnectionState(ia) {
-    const [connectionState, setConnectionState] = useState({});
+    function getCompleteConnectionState() {
+        const state = ia.connectionStateMessage;
+        state.id = ia.connectionState;
+        return state;
+    }
+
+    const [connectionState, setConnectionState] = useState(getCompleteConnectionState());
     useEffect(() => {
         // Note: returned function unbinds onStateChanged() listener on effect cleanup
-        return ia.onStateChanged(stateId => {
-            const state = ia.connectionStateMessage;
-            state.id = stateId;
-            setConnectionState(state);
+        return ia.onStateChanged(() => {
+            setConnectionState(getCompleteConnectionState());
         });
     })
     return connectionState;
@@ -35,15 +53,15 @@ export function isJoiningOrJoinedRoom(connectionState) {
 }
 
 export function ConnectionStatus(props) {
-    const {app} = props;
+    const {app, ...otherProps} = props;
     const connectionState = useConnectionState(app.ia);
 
     const label = 'label' in props ? <span>Connection Status:&nbsp;</span> : null;
 
     return (
-        <span style={{color:IA.util.iacolor_to_css(connectionState.color)}}>
+        <span style={{color:IA.util.iacolor_to_css(connectionState.color)}} {...otherProps}>
             {label}
-            <span className="ia-connect-status-value">{connectionState.message}</span>
+            <span>{connectionState.message}</span>
             <ZeroWidthSpace />
         </span>);
 }
@@ -52,7 +70,8 @@ export function IALogo(props) {
     let {width} = props;
     if (width === undefined)
         width = 100;
-    return <Image src='./img/ia-logo-and-text.png' width={width} />
+    const height = width * (454.0 / 2048);
+    return <Image src='./img/ia-logo-and-text.png' width={width} height={height} {...props} />
 }
 
 export const ConnectionIcon = () => <MdCastConnected className='connection-icon' />;
