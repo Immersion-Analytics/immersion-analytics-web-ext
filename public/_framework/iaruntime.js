@@ -1,5 +1,5 @@
 /**
- * ©2021 Virtual Cove, Inc. d/b/a Immersion Analytics. All Rights Reserved. Patented.
+ * ©2023 Virtual Cove, Inc. d/b/a Immersion Analytics. All Rights Reserved. Patented.
  */
 
 
@@ -30,22 +30,51 @@ window.IA = {
         return client;
     },
 
+    /**
+     * Fires `callback` once Immersion Analytics Runtime is initialized.
+     * If already initialized, callback will be put on event queue to fire immediately via
+     * setTimeout(callback, 0);
+     * Returns a function to remove this listener.
+     */
     onReady : function(callback)
     {
+        let cancelled = false;
+        const invokeCallback = () => {
+            if (!cancelled)
+                callback();
+        }
+        
         if (this.__internal.isRuntimeReady)
-            setTimeout(callback, 0);
+            setTimeout(invokeCallback, 0);
         else
-            this.__internal.onReadyCallbacks.push(callback);
+            this.__internal.onReadyCallbacks.push(invokeCallback);
+        
+        return () => cancelled = true;
     }
 
 }
 
 IA.util = {
-    iacolor_to_css(iacolor) {
+    iaColorToCSS(iacolor) {
         if (!iacolor)
             return "#000";
 
         return 'rgba(' + [iacolor.rByte, iacolor.gByte, iacolor.bByte, iacolor.aByte/255.0].join(',') + ')'
+    },
+
+    dateToNumber(date) {
+        return DotNet.invokeMethod("IARuntime_BlazorJS", "DateToNumber", date);
+    },
+
+    numberToDate(value) {
+        const dateStr = DotNet.invokeMethod("IARuntime_BlazorJS", "NumberToDate", value);
+        if (!dateStr)
+            return null;
+        
+        const date = new Date(dateStr);
+        
+        // Function should return null if date number is not a valid date
+        return isNaN(date) ? null : date;
     }
 }
 
