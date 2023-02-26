@@ -142,7 +142,7 @@ export class IATableauPlatform {
         delete dataSrc.type;
 
         // Write any remaining properties to SourceInfo as JSON
-        dataset.sourceInfo = $.isEmptyObject(dataSrc) ? "" : JSON.stringify(dataSrc);
+        dataset.sourceInfo = Object.keys(dataSrc).length === 0 ? "" : JSON.stringify(dataSrc);
 
         this._updateBindings();
         // TODO handle SourceType or SourceInfo change callback

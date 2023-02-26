@@ -19,7 +19,6 @@ import IAExtensionController from "./IAExtensionController";
 import {IATableauPlatform, IATableauPlatformId} from "./platforms/tableau";
 import {IAWebPlatform, IAWebPlatformId} from "./platforms/web";
 import {NotFoundPage} from "./lib";
-import {cleanup} from "@testing-library/react";
 
 const {IA} = window;
 
@@ -67,13 +66,12 @@ function App() {
     const history = useHistory();
     let { platformId, panelId } = useLocationInfo();
 
-    // const { platformName } = useParams();
     const platformConstructor = platformConstructors[platformId];
 
     if (!panelId)
         panelId = ConnectionPanelId;
 
-    console.log("Updating IA Web Extension UI");
+    console.log("Refreshing IA Web Extension UI");
 
     const initPlatform = () => {
 
@@ -103,7 +101,7 @@ function App() {
 
     // Ensure IA Runtime client is initialized
     useEffect(() => {
-        IA.onReady(() => {
+        return IA.onReady(() => {
             if (iaClient)
                 return; // already created
 
@@ -119,16 +117,26 @@ function App() {
         });
     });
 
+
+    const handleConnectionStateChanged = stateId => {
+        if (stateId === "ConnectedToLobby" || stateId === "JoinedRoom")
+            appController.saveConnectionInfo();
+    }
+
+    useEffect(() => {
+        if (appController)
+            return appController.ia.onStateChanged(handleConnectionStateChanged);
+    })
+
     // Once the IA Scene synchronization between XR device and web browser is initialized this method will be called
     const handleRoomConnectionReady = () => {
         console.log("Room connection is ready!");
-        appController.saveConnectionInfo();
     }
 
     useEffect(() => {
         if (appController)
             return appController.ia.onSyncReady(handleRoomConnectionReady);
-    })
+    });
 
 
     if (!platformConstructors[platformId])
@@ -140,7 +148,6 @@ function App() {
 
     if (isPlatformLoading)
         return <LoadingSpinner />;
-
 
 
     const panelProps = { app: appController, platformId: platformId }
@@ -164,4 +171,4 @@ function App() {
     // );
 }
 
-export default (App);
+export default App;

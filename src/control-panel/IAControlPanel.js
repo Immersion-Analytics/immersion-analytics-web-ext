@@ -5,7 +5,7 @@
  * Utilizes the Immersion Analytics Runtime javascript API and Tableau Dashboard Extensions API
  * to drive holographic visualizations in AR/VR/XR devices like Hololens2 or Oculus from a Tableau dashboard
  */
-import {Container, Row, Col} from "react-bootstrap";
+import {Container, Col} from "react-bootstrap";
 import {Tabs} from "@tableau/tableau-ui";
 import ConnectionControlPanel from "./connection-control-panel";
 import VisualizationsControlPanel from "./visualizations-control-panel";
@@ -49,7 +49,7 @@ function IAControlPanel(props) {
 
     return (
         <Container fluid className='d-flex flex-column h-100vh'>
-            <Row className='px-2'>
+            <div className='px-2 mb-2 d-flex flex-row'>
                 <Col>
                     <IALogo />
                 </Col>
@@ -57,8 +57,8 @@ function IAControlPanel(props) {
                     <ConnectionStatus app={app}/>
                 </Col>
 
-            </Row>
-            <Row className='flex-column flex-grow-1'>
+            </div>
+            <div className='flex-column flex-grow-1'>
                 <Tabs
                     activation='manual'
                     onTabChange={goToPanel}
@@ -68,10 +68,7 @@ function IAControlPanel(props) {
                     >
                     { tabs[selectedTabIndex].component(props) }
                 </Tabs>
-            </Row>
-            <Row>
-
-            </Row>
+            </div>
         </Container>
     );
 }

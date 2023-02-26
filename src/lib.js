@@ -8,31 +8,8 @@ export const DialogModeHash = "#dialog";
  * Refreshes component when property value changes.
  * If getter throws an exception, returned value will be set to undefined.
  */
-export function usePropertyValue(getter, undefinedValue) {
-
-    let property;
-    try {
-        property = getter();
-    } catch {}
-
-    const [propertyValue, setPropertyValue] = useState(property?.value);
-
-    const propertyObjectId = property?._netWrapper._id;
-
-    useEffect(() => {
-        if (property)
-        {
-            setPropertyValue(property.value);
-
-            return property.onChanged(() => {
-                setPropertyValue(property.value)
-            });
-        }
-    }, [propertyObjectId]);
-
-    // const property = useIAObject(getter);
-    // const propertyValue = property ? property.value : undefined;
-
+export function usePropertyValue(getter, undefinedValue, onChanged) {
+    const propertyValue = useIAObject(getter)?.value;
     return propertyValue === undefined ? undefinedValue : propertyValue;
 }
 

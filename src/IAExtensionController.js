@@ -23,9 +23,9 @@ export class IAExtensionController {
         this.scene = this.ia.scene;
         this.database = this.ia.scene.database;
 
-        // TODO
         this.ia.onRoomPasswordRequired((uri, msg) => this._handleRoomPasswordRequired(uri, msg));
 
+        this.lastLobbyServerAddress = '';
 
         // $('#pw-input-modal .btn-primary').click(e => this._submitRoomPassword());
     }
@@ -61,12 +61,12 @@ export class IAExtensionController {
         console.log("Trying connection info");
 
         const lobbyServer = info.lobby?.server;
-        if (lobbyServer && lobbyServer !== this.ia.lobbyServerUri) {
+        if (lobbyServer !== this.ia.lobbyServerUri) {
             this.ia.reconnectToLobby(lobbyServer);
         }
 
         const roomServer = info.room?.server;
-        if (roomServer && roomServer !== this.ia.roomServerUri) {
+        if (roomServer !== this.ia.roomServerUri) {
             this.ia.connectToRoom(roomServer, info.room.password);
         }
     }
@@ -79,13 +79,12 @@ export class IAExtensionController {
     }
 
     /** Reconnect to the IA Runtime Lobby Server URI entered in the server address input */
-    reconnectToLobby(address)
-    {
+    reconnectToLobby(address) {
         // let address = this._serverAddressInput.val();
         if (address)
-            this._serverAddress = address;
+            this.lastLobbyServerAddress = address;
 
-        console.log("Reconnect to lobby: " + this._serverAddress);
+        console.log("Reconnect to lobby: " + this.lastLobbyServerAddress);
 
 
         /* If this URI is a collab Room server rather than Lobby server,
@@ -93,10 +92,27 @@ export class IAExtensionController {
         * a room server
         */
         try {
-            this.ia.connectToLobbyServer(this._serverAddress);
+            this.ia.connectToLobbyServer(this.lastLobbyServerAddress);
         } catch (e) {
             this._handleError("connecting to lobby server", e);
         }
+    }
+
+    disconnectLobby() {
+        this.ia.disconnectLobbyServer();
+        this.saveConnectionInfo();
+    }
+
+    disconnectRoom() {
+        this.ia.disconnect();   // ia.disconnect() only disconnects the room server
+        this.saveConnectionInfo();
+    }
+    
+    getRecentServers() {
+        return [
+            // { url: 'ws://localhost:11701', name: 'Local Visualizer App' },
+            { url: 'ws://localhost:11700', name:'Local Runtime Server' },
+        ];
     }
 
 

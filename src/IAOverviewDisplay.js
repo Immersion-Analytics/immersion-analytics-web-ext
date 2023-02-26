@@ -7,10 +7,8 @@
  */
 
 
-import React, {useState, useEffect} from 'react';
+import React from 'react';
 import {Button} from "@tableau/tableau-ui";
-
-import {Col, Row, Container, Image} from "react-bootstrap";
 
 import {ConnectionIcon, ConnectionStatus, IALogo, VisualizationsIcon} from "./control-panel/components";
 import {DialogModeHash} from "./lib";

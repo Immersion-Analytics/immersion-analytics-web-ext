@@ -1,6 +1,7 @@
 import {Image} from "react-bootstrap";
 import React, {useEffect, useState} from "react";
 import {
+    AiFillEye, AiFillEyeInvisible,
     GiSunglasses,
     ImPlus,
     IoCloseCircle,
@@ -8,7 +9,8 @@ import {
     MdCastConnected,
     MdDelete
 } from "react-icons/all";
-import {Button} from "@tableau/tableau-ui";
+import {Button, TextField} from "@tableau/tableau-ui";
+import {usePropertyValue} from "../lib";
 
 const {IA} = window;
 
@@ -16,21 +18,8 @@ export function ZeroWidthSpace() {
     return (<span>&#8203;</span>);
 }
 
-// export function Flex(props) {
-//     let {className, vertical, ...otherProps} = props;
-//     className += " d-flex";
-//
-//     if (vertical === undefined || vertical)
-//         className += " flex-column";
-//
-//     return (
-//         <div className={className} {...otherProps}>
-//             {props.children}
-//         </div>
-//     );
-// }
 
-export function useConnectionState(ia) {
+export function useConnectionState(ia, onChanged) {
     function getCompleteConnectionState() {
         const state = ia.connectionStateMessage;
         state.id = ia.connectionState;
@@ -41,10 +30,23 @@ export function useConnectionState(ia) {
     useEffect(() => {
         // Note: returned function unbinds onStateChanged() listener on effect cleanup
         return ia.onStateChanged(() => {
-            setConnectionState(getCompleteConnectionState());
+            const state = getCompleteConnectionState();
+            setConnectionState(state);
+            if (onChanged)
+                onChanged(state);
         });
     })
     return connectionState;
+}
+
+export function useRoomInfo(ia) {
+    const [roomInfo, setRoomInfo] = useState(ia.room)
+    useEffect(() => {
+        return ia.onRoomChanged(room => {
+            setRoomInfo(room);
+        })
+    });
+    return roomInfo;
 }
 
 export function isJoiningOrJoinedRoom(connectionState) {
@@ -59,7 +61,7 @@ export function ConnectionStatus(props) {
     const label = 'label' in props ? <span>Connection Status:&nbsp;</span> : null;
 
     return (
-        <span style={{color:IA.util.iacolor_to_css(connectionState.color)}} {...otherProps}>
+        <span style={{color:IA.util.iaColorToCSS(connectionState.color)}} {...otherProps}>
             {label}
             <span>{connectionState.message}</span>
             <ZeroWidthSpace />
@@ -81,6 +83,13 @@ export const AddIcon = () => <ImPlus className='add-icon text-success' />;
 export const DeleteIcon = () => <IoCloseCircle className='delete-icon text-danger' />;
 export const TrashIcon = () => <MdDelete className={'trash-icon'} />;
 
+export const EyeIcon = props => {
+    const {on} = props;
+    return on
+        ? <AiFillEye className='eye-icon' />
+        : <AiFillEyeInvisible className='eye-icon text-muted' />
+}
+
 export function IconButton(props) {
     let {icon, className, ...otherProps} = props;
     className = "icon-btn " + (className ?? '');
@@ -89,7 +98,7 @@ export function IconButton(props) {
     </Button>
 }
 
-export function ReconnectButton(props) {
+export function ReconnectLobbyButton(props) {
     const {app} = props;
     return (
         <IconButton
@@ -98,4 +107,54 @@ export function ReconnectButton(props) {
                 {...props} />
     );
 }
+
+export function DisconnectLobbyButton(props) {
+    const {app} = props;
+    return (
+        <IconButton
+            icon={DeleteIcon}
+            onClick={() => app.disconnectLobby()}
+            {...props} />
+    );
+}
+
+export function PropertyBoundTextField(props) {
+    const {propertyGetter, validate} = props;
+
+    const propertyValue = usePropertyValue(propertyGetter, '');
+    const [fieldValue, setFieldValue] = useState(propertyValue);
+
+    // While field is focused, input onChange() sets value,
+    // Otherwise, value is pulled from the bound property
+    const [focused, setFocused] = useState();
+
+    if (!focused && fieldValue !== propertyValue)
+        setFieldValue(propertyValue);
+
+    const getValidationError = value => validate ? validate(value) : undefined;
+
+    const validationError = getValidationError(fieldValue);
+    const valid = validationError === undefined ? undefined : false;
+    let message = validationError ?? '\u200b'; // zero width space
+
+    const handleInputChanged = e => {
+        const inputValue = e.target.value;
+        setFieldValue(inputValue);
+        if (!getValidationError(inputValue))
+            propertyGetter()?.set(inputValue);
+    }
+
+    return (
+        <TextField value={fieldValue}
+                   onChange={handleInputChanged}
+                   onFocus={() => setFocused(true)}
+                   onBlur={() => setFocused(false)}
+                   valid={valid}
+                   message={message}
+                   // onBlur={setFieldValue(propertyValue)}
+                   kind='line'
+        />
+    );
+}
+
 

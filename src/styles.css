@@ -45,6 +45,7 @@ body {
   border-radius: 1px;
   padding: 0 7px;
   height: 24px;
+  text-align: left;
 }
 
 .dropdown-toggle:hover:enabled, .dropdown-toggle:active {
@@ -64,6 +65,10 @@ body {
 /** =============================== */
 
 
+.modal-header, .modal-body, .modal-footer {
+  padding: .5rem;
+}
+
 
 .container-fluid {
   padding-left: 2px;
@@ -74,6 +79,9 @@ body {
   height: 100vh;
 }
 
+div[role='tabpanel'] {
+  padding: 18px 0 0 0;
+}
 /* Ensure the tabpanel body of a flex-grow Tab component grows too */
 .flex-grow-1 > div[role='tabpanel'] {
   flex-grow: 1 !important;
@@ -181,6 +189,15 @@ input[type="text"], input[type="password"] {
   margin-bottom: .1em;
 }
 
+.eye-icon {
+  font-size: 1.5em;
+  color: #7b7b7b;
+}
+
+.eye-icon.text-muted {
+
+}
+
 /* Table row without boundary between itself and the row above */
 /*tr.connected-row {*/
 /*}*/
@@ -197,8 +214,12 @@ tr.connected-row td {
   flex-grow: 1;
 }
 
-.table input {
-    width: 100%;
+.fullwidth-inputs input,
+.fullwidth-inputs .line,
+.fullwidth-inputs .outline
+.fullwidth-inputs .dropdown,
+.fullwidth-inputs .dropdown button {
+  width: 100%;
 }
 
 fieldset[disabled] tr, .text-muted {
@@ -206,20 +227,49 @@ fieldset[disabled] tr, .text-muted {
 }
 
 #ia-axis-mappings {
-  font-size: .9rem;
+  /*font-size: .9rem;*/
+
+  /*Counteract padding from tabpanel, so rows reach edges*/
 }
 
-#ia-axis-mappings .dataTables_filter {
-  float: right !important;
+#ia-axis-mappings td, #ia-axis-mappings th {
+  padding: 6px 2px;
 }
 
 .ia-axis-mapping .dropdown-menu {
-  font-size: 1em;
+  /*font-size: 1em;*/
   max-height: 20em;
   overflow-y: auto;
 }
 
-.ia-axis-mapping .dropdown-item {
+.ia-axis-mapping button {
+  width: 95%;
+  text-align: right;
+  border: none !important;
+}
+
+.ia-axis-mapping.missing button {
+  color: #dc3545 !important;  /* From Bootstrap .text-danger */
+}
+
+/** Fade the button section out when mouse not over this mapping row */
+.ia-axis-mapping-row .buttons {
+  opacity: 0;
+}
+
+.ia-axis-mapping-row:hover .buttons {
+  opacity: 1;
+  transition: opacity .2s ease-in-out;
+}
+
+/** Fade out individual buttons when mouse not hovering them */
+.ia-axis-mapping-row .buttons {
+  opacity: .5;
+}
+
+.ia-axis-mapping-row .buttons button {
+  opacity: 1;
+  transition: opacity .2s ease-in-out;
 }
 
 #loading-spinner-modal .modal-dialog {
@@ -244,6 +294,11 @@ fieldset[disabled] tr, .text-muted {
 #loading-spinner-modal .loading-msg {
   font-weight: 100;
   margin-bottom: 20px;
+}
+
+.inline-spinner {
+  display: inline;
+  margin: 0 1em;
 }
 
 /*
