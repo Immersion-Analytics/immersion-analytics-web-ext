@@ -27,7 +27,9 @@ export class IAExtensionController {
 
         this.lastLobbyServerAddress = '';
 
-        // $('#pw-input-modal .btn-primary').click(e => this._submitRoomPassword());
+        this.onRoomPasswordRequest = null;
+        this._lastRoomPassword = null;
+        this.connectionInfo = null;
     }
 
     saveConnectionInfo() {
@@ -37,37 +39,52 @@ export class IAExtensionController {
             },
             room: {
                 server: this.ia.roomServerUri,
-                name: this.ia.room?.name
+                name: this.ia.room?.name,
+                password: this._lastRoomPassword,
             },
         });
 
-        console.log("Save connection info: " + info);
-
-        this.platform.saveSettings({"ia-connection-info": info});
+        try {
+            this.platform.saveSettings({"ia-connection-info": info});
+        }
+        catch (e) {
+            console.error("Error saving connection settings:", e);
+        }
     }
 
     handleSettingsChanged(settings) {
         console.log("Handling settings changed");
         const connectionInfo = settings["ia-connection-info"];
         if (connectionInfo)
-            this._tryConnectionInfo(connectionInfo);
+        {
+            const parsedInfo = parseJSON(connectionInfo);
+            if (!parsedInfo) {
+                console.log("Could not read connection info:", connectionInfo);
+            }
+            this.connectionInfo = parsedInfo;
+            this.retryConnectionInfo();
+        }
     }
 
-    _tryConnectionInfo(infoStr) {
-        const info = parseJSON(infoStr);
-        if (!info) {
-            console.log("Could not read connection info: " + infoStr);
+    retryConnectionInfo() {
+        const info = this.connectionInfo;
+        console.log("Trying connection info:", info);
+
+        if (!info)
+        {
+            this.ia.disconnectLobbyServer();
+            this.ia.disconnect();
+            return;
         }
-        console.log("Trying connection info");
 
         const lobbyServer = info.lobby?.server;
         if (lobbyServer !== this.ia.lobbyServerUri) {
-            this.ia.reconnectToLobby(lobbyServer);
+            this.ia.connectToLobbyServer(lobbyServer);
         }
 
         const roomServer = info.room?.server;
         if (roomServer !== this.ia.roomServerUri) {
-            this.ia.connectToRoom(roomServer, info.room.password);
+            this.ia.connectToRoom(roomServer, info.room?.password);
         }
     }
 
@@ -115,24 +132,25 @@ export class IAExtensionController {
         ];
     }
 
+    joinOrCreateRoom(name, password, viewerPassword) {
+        this._lastRoomPassword = password;
+        this.ia.joinOrCreateRoom(name, password, viewerPassword);
+    }
 
     /** If the room we are trying to join requires a password, display a
      * popup dialog allowing the user to enter the password.
      */
     _handleRoomPasswordRequired(uri, msg) {
-        this._lastRoomPasswordUri = uri;
-        this._passwordModal.find(".pw-msg").text(msg.details);
-        this._passwordModal.modal();
+        if (this.onRequestRoomPassword)
+            this.onRequestRoomPassword(uri, msg);
     }
 
-    /** Send room password entered in the room password dialog to the IA Runtime API */
-    // _submitRoomPassword() {
-    //     let pw = $('#pw-input-modal pw-input').val();
-    //     this.ia.provideRoomPassword(this._lastRoomPasswordUri, pw);
-    //     this._passwordModal.modal('hide');
-    // }
-
-
+    provideRoomPassword(uri, password) {
+        this._lastRoomPassword = password;
+        this.ia.provideRoomPassword(uri, password);
+        // If this password leads to a successful connection, it will be saved
+        // to connectionInfo when room is joined
+    }
 
     /** Create an IA table for `dataSrc` and set it as the data source
      * for the currently selected visualization

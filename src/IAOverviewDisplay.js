@@ -10,8 +10,15 @@
 import React from 'react';
 import {Button} from "@tableau/tableau-ui";
 
-import {ConnectionIcon, ConnectionStatus, IALogo, VisualizationsIcon} from "./control-panel/components";
+import {
+    ConnectionIcon,
+    ConnectionStatus,
+    IALogo,
+    RetryConnectionInfoButton,
+    VisualizationsIcon
+} from "./control-panel/components";
 import {DialogModeHash} from "./lib";
+import {RoomPasswordInput} from "./modals/RoomPasswordInput";
 
 
 function IAOverviewDisplay(props) {
@@ -29,25 +36,25 @@ function IAOverviewDisplay(props) {
     return (
     <div className='d-flex flex-wrap align-items-center'>
         <IALogo className='mr-2'/>
-        <div className='d-flex flex-wrap align-items-center'>
-            <Button className='mr-1 mt-1' density='high'
+
+        <Button className="mr-1 mt-1" density='high'
+                onClick={() => showConfig('visualizations')}>
+
+            <VisualizationsIcon /><span>&nbsp;Visualizations</span>
+        </Button>
+        <Button className='mr-1 mt-1' density='high'
                 onClick={() => showConfig('connection')}>
 
-                <ConnectionIcon /><span>&nbsp;Connect</span>
-            </Button>
-
-            <Button className="mr-1 mt-1" density='high'
-                    onClick={() => showConfig('visualizations')}>
-
-                <VisualizationsIcon /><span>&nbsp;Visualizations</span>
-            </Button>
-        </div>
+            <ConnectionIcon /><span>&nbsp;Connect</span>
+        </Button>
+        {/*<RetryConnectionInfoButton app={app}/>*/}
+        <ConnectionStatus app={app} className='mt-1 mx-2 flex-grow-1'/>
+        {/*</div>*/}
             {/*    <Button className="icon-btn ia-show-console" data-target="#console-out-modal" data-toggle="modal">*/}
             {/*        <BsTerminal />*/}
             {/*    </Button>*/}
             {/*<span className="d-inline-block text-nowrap">Connection Status:</span>&nbsp;*/}
-        <ConnectionStatus app={app} className='mt-1'/>
-        </div>
+    </div>
     );
 }
 

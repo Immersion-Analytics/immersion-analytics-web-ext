@@ -25,7 +25,7 @@ function ConnectionControlPanel(props) {
     const roomPasswordRef = React.createRef();
     const [viewerPasswordEnabled, setViewerPasswordEnabled] = useState();   // refs don't seem to work with Checkbox
     const viewerPasswordRef = React.createRef();
-    const handleJoinRoomButton = e => app.ia.joinOrCreateRoom(
+    const handleJoinRoomButton = e => app.joinOrCreateRoom(
         roomNameRef.current.value,
         roomPasswordRef.current.value,
         viewerPasswordEnabled ? viewerPasswordRef.current.value : null
