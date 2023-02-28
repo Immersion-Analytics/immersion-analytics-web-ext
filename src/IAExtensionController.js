@@ -1,9 +1,11 @@
 /**
- * ©2021 Virtual Cove, Inc. d/b/a Immersion Analytics. All Rights Reserved. Patented.
+ * ©2023 Virtual Cove, Inc. d/b/a Immersion Analytics. All Rights Reserved. Patented.
  *
  * Immersion Analytics Runtime - Tableau Dashboard Extension
  * Utilizes the Immersion Analytics Runtime javascript API and Tableau Dashboard Extensions API
  * to drive holographic visualizations in AR/VR/XR devices like Hololens2 or Oculus from a Tableau dashboard
+ *
+ * @author Aaron Moffatt
  */
 import {parseJSON} from "./lib";
 
