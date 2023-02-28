@@ -347,3 +347,7 @@ fieldset[disabled] tr, .text-muted {
 
 #variable-select-modal {
 }
+
+.app-version {
+  /*font-size: .9em;*/
+}

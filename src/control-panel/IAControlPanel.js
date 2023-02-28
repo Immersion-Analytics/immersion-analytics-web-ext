@@ -14,7 +14,7 @@ import ConnectionControlPanel from "./connection-control-panel";
 import VisualizationsControlPanel from "./visualizations-control-panel";
 import {useHistory} from 'react-router-dom'
 import {getPanelUrl} from "../lib";
-import {ConnectionIcon, ConnectionStatus, IALogo, VisualizationsIcon} from "./components";
+import {ConnectionIcon, ConnectionStatus, ExtensionVersion, IALogo, VisualizationsIcon} from "./components";
 import {RoomPasswordInput} from "../modals/RoomPasswordInput"
 
 
@@ -56,6 +56,7 @@ function IAControlPanel(props) {
             <div className='px-2 mb-2 d-flex flex-row'>
                 <Col>
                     <IALogo />
+                    <ExtensionVersion platform={platformId}/>
                 </Col>
                 <Col className='text-right'>
                     <ConnectionStatus app={app}/>

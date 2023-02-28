@@ -11,6 +11,7 @@ import {
 } from "react-icons/all";
 import {Button, TextField} from "@tableau/tableau-ui";
 import {usePropertyValue} from "../lib";
+import {version} from "../../package.json";
 
 const {IA} = window;
 
@@ -116,6 +117,12 @@ export function DisconnectLobbyButton(props) {
             onClick={() => app.disconnectLobby()}
             {...props} />
     );
+}
+
+export function ExtensionVersion(props) {
+    const {platform} = props;
+    return (<span className='mx-1 app-version'>| {platform} v{version}</span>)
+
 }
 
 export function PropertyBoundTextField(props) {

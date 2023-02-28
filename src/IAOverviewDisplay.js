@@ -14,13 +14,12 @@ import {Button} from "@tableau/tableau-ui";
 
 import {
     ConnectionIcon,
-    ConnectionStatus,
+    ConnectionStatus, ExtensionVersion,
     IALogo,
     RetryConnectionInfoButton,
     VisualizationsIcon
 } from "./control-panel/components";
 import {DialogModeHash} from "./lib";
-import {RoomPasswordInput} from "./modals/RoomPasswordInput";
 
 
 function IAOverviewDisplay(props) {
@@ -37,9 +36,9 @@ function IAOverviewDisplay(props) {
 
     return (
     <div className='d-flex flex-wrap align-items-center'>
-        <IALogo className='mr-2'/>
-
-        <Button className="mr-1 mt-1" density='high'
+        <IALogo className='mr-0'/>
+        <ExtensionVersion platform={app.platform.id}/>
+        <Button className="ml-1 mr-1 mt-1" density='high'
                 onClick={() => showConfig('visualizations')}>
 
             <VisualizationsIcon /><span>&nbsp;Visualizations</span>
