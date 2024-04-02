@@ -1,4 +1,4 @@
-# Want to try our Tableau Integration for Immersive Visualizations?
+# Want to try our Tableau Integration for Immersive Visualization?
 We enable any Tableau user to take their existing Tableau Dashboard and – in a matter of minutes – have it be visualized, analyzed, and communicated immersively.
 
 It's Free for Trial and Beta use.
