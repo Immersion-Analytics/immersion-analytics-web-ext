@@ -1,6 +1,6 @@
 import {Collapse, Modal} from "react-bootstrap";
-import {Button, Spinner} from "@tableau/tableau-ui";
-import {BsTerminal} from "react-icons/all";
+import {Button, Spinner} from "@tableau/tableau-ui";  // Button & Spinner components from tableau-ui for UI consistency
+import {BsTerminal} from "react-icons/all";  // Import terminal icon from react-icons for use in console display
 import "../styles.css";
 
 
@@ -25,7 +25,7 @@ function LoadingSpinner()
 export default LoadingSpinner;
 
 
-
+// following is for displaying a collapsible console button for additional information.
 // <div className="modal" id="loading-spinner-modal" data-backdrop="static" data-keyboard="false" tabIndex="-1">
 //     <div className="modal-dialog modal-sm modal-dialog-scrollable">
 //         <div className="modal-content text-nowrap">

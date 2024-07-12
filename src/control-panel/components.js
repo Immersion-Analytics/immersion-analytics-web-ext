@@ -1,3 +1,9 @@
+/**
+ * Provides various React components and hooks for managing and displaying connection status, icons, and
+ * property-bound text fields within a web application. It leverages libraries like React Bootstrap, React
+ * Icons, and custom hooks to create a dynamic and responsive UI for an interactive analytics application.
+ */
+ 
 import {Image} from "react-bootstrap";
 import React, {useEffect, useState} from "react";
 import {
@@ -19,7 +25,7 @@ export function ZeroWidthSpace() {
     return (<span>&#8203;</span>);
 }
 
-
+// Hook to manage connection state and trigger a callback on state change
 export function useConnectionState(ia, onChanged) {
     function getCompleteConnectionState() {
         const state = ia.connectionStateMessage;
@@ -40,6 +46,7 @@ export function useConnectionState(ia, onChanged) {
     return connectionState;
 }
 
+// Hook to manage and update room information
 export function useRoomInfo(ia) {
     const [roomInfo, setRoomInfo] = useState(ia.room)
     useEffect(() => {
@@ -50,11 +57,13 @@ export function useRoomInfo(ia) {
     return roomInfo;
 }
 
+// Utility function to check if connection state is joining or joined
 export function isJoiningOrJoinedRoom(connectionState) {
     const {id} = connectionState;
     return id === "JoiningRoom" || id === "JoinedRoom";
 }
 
+// Component to display the connection status with optional label
 export function ConnectionStatus(props) {
     const {app, ...otherProps} = props;
     const connectionState = useConnectionState(app.ia);
@@ -69,6 +78,7 @@ export function ConnectionStatus(props) {
         </span>);
 }
 
+// Component to render the IA logo with default or specified width
 export function IALogo(props) {
     let {width} = props;
     if (width === undefined)
@@ -77,6 +87,7 @@ export function IALogo(props) {
     return <Image src='./img/ia-logo-and-text.png' width={width} height={height} {...props} />
 }
 
+// Individual icon components for various actions
 export const ConnectionIcon = () => <MdCastConnected className='connection-icon' />;
 export const VisualizationsIcon = () => <GiSunglasses className='visualizations-icon' />;
 export const RefreshIcon = () => <IoMdRefresh className='refresh-icon text-success' />;
@@ -84,6 +95,7 @@ export const AddIcon = () => <ImPlus className='add-icon text-success' />;
 export const DeleteIcon = () => <IoCloseCircle className='delete-icon text-danger' />;
 export const TrashIcon = () => <MdDelete className={'trash-icon'} />;
 
+// Component to render an eye icon indicating visibility
 export const EyeIcon = props => {
     const {on} = props;
     return on
@@ -91,6 +103,7 @@ export const EyeIcon = props => {
         : <AiFillEyeInvisible className='eye-icon text-muted' />
 }
 
+// Component to create a button with an icon
 export function IconButton(props) {
     let {icon, className, ...otherProps} = props;
     className = "icon-btn " + (className ?? '');
@@ -99,6 +112,7 @@ export function IconButton(props) {
     </Button>
 }
 
+// Component to render a button for reconnecting to the lobby
 export function ReconnectLobbyButton(props) {
     const {app} = props;
     return (
@@ -125,6 +139,7 @@ export function ExtensionVersion(props) {
 
 }
 
+// Component for a text field bound to a property with validation
 export function PropertyBoundTextField(props) {
     const {propertyGetter, validate} = props;
 
@@ -163,5 +178,3 @@ export function PropertyBoundTextField(props) {
         />
     );
 }
-
-

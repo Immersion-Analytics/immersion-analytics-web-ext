@@ -8,7 +8,11 @@ import {IA_MAX_ROWS_TO_LOAD} from "../IAExtensionController";
 import {useIAObject, usePropertyValue} from "../lib";
 import LoadingSpinner from "../modals/LoadingSpinner";
 
-
+/**
+ * This implements a React component for a control panel that manages visualizations within an application.
+ * It includes functionalities for selecting and configuring visualizations, data sources, and axis
+ * mappings, facilitating an intuitive interface for users to interact with their data visualizations.
+ */
 function VisualizationsControlPanel(props) {
     const {app} = props;
     const {scene} = app;
@@ -45,7 +49,7 @@ function VisualizationsControlPanel(props) {
         const viz = scene.focusedViz;
 
         // If not selection, don't show a validation error
-        if (!viz)
+        if (!viz) 
             return;
 
         if (!name)
@@ -186,6 +190,7 @@ function DataSourceSelect(props) {
 
     const [loading, setLoading] = useState();
 
+    // Build an array of data sources combining active and available ones
     const buildDataSourcesArray = (datasets, platformDataSources) => {
         let items = [];
 
@@ -212,6 +217,7 @@ function DataSourceSelect(props) {
             });
     }
 
+    // Create a dropdown item for each data source
     const makeDataSourceSelectItem = (item, index) => {
         if (item.sectionHeaderName)
             return (
@@ -246,6 +252,7 @@ function AxisMappings(props) {
     // re-render if the axis mappings list property changes
     useIAObject(() => axisGroup);
 
+    // Create a row for each axis mapping
     const makeMappingRow = axis => {
         const mappingInfo = axisGroup.getMapping(axis.name);
         mappingInfo.axisName = axis.name;   // ensure this is set
@@ -291,6 +298,7 @@ function AxisMappingRow(props) {
         setRenderVariableNames(undefined);
     };
 
+    // Create a dropdown item for each variable
     const makeVariableSelectOption = variableName => {
         return (
             <Dropdown.Item key={variableName}

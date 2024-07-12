@@ -1,9 +1,10 @@
 /**
- * ©2023 Virtual Cove, Inc. d/b/a Immersion Analytics. All Rights Reserved. Patented.
+ * ©2024 Virtual Cove, Inc. d/b/a Immersion Analytics. All Rights Reserved. Patented.
  *
  * Immersion Analytics Runtime - Tableau Dashboard Extension
  * Utilizes the Immersion Analytics Runtime javascript API and Tableau Dashboard Extensions API
- * to drive holographic visualizations in AR/VR/XR devices like Hololens2 or Oculus from a Tableau dashboard
+ * to drive holographic visualizations in AR/VR/XR devices like Hololens 2 or Meta Quest from a Tableau dashboard
+ * It uses React components and React Router for navigation and displays connection and visualization controls.
  *
  * @author Aaron Moffatt
  */
@@ -45,12 +46,13 @@ function IAControlPanel(props) {
 
     console.log("Launching IA Control Panel");
 
+    // Function to handle tab change
     const goToPanel = index => {
         const panelUrl = getPanelUrl(platformId, tabs[index].id);
         history.push(panelUrl);
     };
 
-
+    // Main layout of the control panel
     return (
         <Container fluid className='d-flex flex-column h-100vh'>
             <div className='px-2 mb-2 d-flex flex-row'>

@@ -10,21 +10,31 @@ import {
 } from "./components";
 import {FiEdit, IoGlobeOutline} from "react-icons/all";
 
+/**
+ * The provided JavaScript file contains a React component for controlling the connection state of a
+ * collaborative application, allowing users to set server addresses, join or create collaboration rooms,
+ * and manage connection statuses. It includes UI elements like modals, dropdowns, and input fields for
+ * user interaction.
+ */
 function ConnectionControlPanel(props) {
     const { app } = props;
 
+    // Get the current connection state of the app
     const connectionState = useConnectionState(app.ia);
     const joiningOrJoinedRoom = isJoiningOrJoinedRoom(connectionState);
     const disableConnectButton = ["Disconnected", "ConnectingToLobby", "Disconnecting"].includes(connectionState.id);
 
     const [showAddressModal, setShowAddressModal] = useState();//connectionState.id == "Disconnected");
 
+    // Handle selecting a recent server address to reconnect to the lobby
     const handleRecentAddressSelect = address => app.reconnectToLobby(address);
 
     const roomNameRef = React.createRef();
     const roomPasswordRef = React.createRef();
     const [viewerPasswordEnabled, setViewerPasswordEnabled] = useState();   // refs don't seem to work with Checkbox
     const viewerPasswordRef = React.createRef();
+	
+    // Handle joining or creating a room with the entered details
     const handleJoinRoomButton = e => app.joinOrCreateRoom(
         roomNameRef.current.value,
         roomPasswordRef.current.value,
@@ -187,4 +197,3 @@ function ServerAddressModal(props) {
         </Modal>
     );
 }
-
