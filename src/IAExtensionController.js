@@ -14,6 +14,12 @@ const {confirm} = window;
 export const IA_MAX_ROWS_TO_LOAD = 2000
 
 export class IAExtensionController {
+    /**
+     * Constructor for IAExtensionController
+     * @param {Object} platform - Platform object for saving settings
+     * @param {Object} iaClient - IA client object for interacting with IA Runtime
+     * @param {Function} errorCallback - Callback function for handling errors
+     */
     constructor(platform, iaClient, errorCallback)
     {
         this.platform = platform;
@@ -25,6 +31,7 @@ export class IAExtensionController {
         this.scene = this.ia.scene;
         this.database = this.ia.scene.database;
 
+        // Event handler for room password requirement
         this.ia.onRoomPasswordRequired((uri, msg) => this._handleRoomPasswordRequired(uri, msg));
 
         this.lastLobbyServerAddress = '';
@@ -34,6 +41,9 @@ export class IAExtensionController {
         this.connectionInfo = null;
     }
 
+    /**
+     * Save the current connection information to the platform settings
+     */
     saveConnectionInfo() {
         const info = JSON.stringify({
             lobby: {
@@ -54,6 +64,10 @@ export class IAExtensionController {
         }
     }
 
+    /**
+     * Handle changes in settings
+     * @param {Object} settings - Updated settings object
+     */
     handleSettingsChanged(settings) {
         console.log("Handling settings changed");
         const connectionInfo = settings["ia-connection-info"];
@@ -68,6 +82,9 @@ export class IAExtensionController {
         }
     }
 
+    /**
+     * Retry connecting to the lobby and room servers using stored connection info
+     */
     retryConnectionInfo() {
         const info = this.connectionInfo;
         console.log("Trying connection info:", info);
@@ -90,6 +107,11 @@ export class IAExtensionController {
         }
     }
 
+    /**
+     * Handle errors by logging them and calling the error callback
+     * @param {String} actionSubject - The action that caused the error
+     * @param {Error} error - The error object
+     */
     _handleError(actionSubject, error) {
         const message = `Error ${actionSubject}`;
         console.error(message, error);
@@ -97,7 +119,10 @@ export class IAExtensionController {
             this.errorCallback(message, error);
     }
 
-    /** Reconnect to the IA Runtime Lobby Server URI entered in the server address input */
+    /**
+     * Reconnect to the IA Runtime Lobby Server URI entered in the server address input
+     * @param {String} address - Lobby server address
+     */
     reconnectToLobby(address) {
         // let address = this._serverAddressInput.val();
         if (address)
